@@ -1,0 +1,64 @@
+---
+title: "Mauna Loa"
+author: "Faithwin Gbadamosi"
+format: html
+editor: visual
+---
+
+Load the necessary libraries
+
+```{r}
+library(readr) 
+library(ggplot2) 
+library(knitr) 
+library(dplyr)
+```
+
+library(readr) library(ggplot2) library(knitr) library(dplyr)
+
+# URL of the dataset
+
+```{r}
+url <- "ftp://aftp.cmdl.noaa.gov/products/trends/co2/co2_annmean_mlo.txt"
+```
+
+# Read the data
+
+```{r}
+co2_data <- read_table(url, skip = 57, col_names = c("Year", "Mean_CO2"))
+```
+
+co2_data \<- read_table(url, skip = 57, col_names = c("Year", "Mean_CO2"))
+
+# View the first rows of the dataset using
+
+```{r}
+head(co2_data)
+```
+
+### Create a Time Series Plot of CO2 Levels
+
+Plot to visualize how CO2 levels have changed over the years.
+
+
+
+```{r}
+ggplot(co2_data, aes(x = Year, y = Mean_CO2)) + geom_line(color = "blue") + labs(title = "Mauna Loa CO2 Annual Mean", x = "Year", y = "Mean CO2 (ppm)") + theme_minimal()
+
+```
+
+### Step 6: Generate a Summary Table
+
+Summary table of CO2 data. Calculate the average CO2 level for each decade.
+
+
+
+```{r}
+co2_decade <- co2_data %>% mutate(Decade = floor(Year / 10) * 10) %>% group_by(Decade) %>% summarize(Mean_CO2 = mean(Mean_CO2, na.rm = TRUE))
+```
+
+# Display the summary table
+
+```{r}
+co2_decade %>% kable(caption = "Mean CO2 Levels per Decade")
+```
