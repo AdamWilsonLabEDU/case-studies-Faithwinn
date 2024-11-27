@@ -35,7 +35,7 @@ Set Up Census API Key and Variables
 
 ```{r}
 # Set your Census API key (replace "YOUR_API_KEY" with your key) 
-census_api_key("f3bf71caa5fdb11eefff6bb83c7dec54f179b45c", install = TRUE, overwrite = TRUE) 
+census_api_key("aAPI-KEY", install = TRUE, overwrite = TRUE) 
 readRenviron("~/.Renviron")  
 # Specify variables for racial demographics 
 race_vars <- c(   "Total Population" = "P1_001N",   "White alone" = "P1_003N",   "Black or African American alone" = "P1_004N",   "American Indian and Alaska Native alone" = "P1_005N",   "Asian alone" = "P1_006N",   "Native Hawaiian and Other Pacific Islander alone" = "P1_007N",   "Some Other Race alone" = "P1_008N",   "Two or More Races" = "P1_009N" ) 
