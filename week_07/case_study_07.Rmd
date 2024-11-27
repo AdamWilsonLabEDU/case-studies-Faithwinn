@@ -1,7 +1,35 @@
 ---
 title: "Case Study 07"
-author: Your Name
-date: August 1, 2020
+author: Faithwin Gbadamosi
+date: October, 2024
 output: github_document
 ---
+```{r}
+ library(tidyverse)
+library(reprex)
+library(sf)
+
+library(spData)
+data(world)
+```
+
+
+#The plot 
+```{r}
+ggplot(world,aes(x=gdpPercap, y=continent, color=continent))+
+  geom_density(alpha=0.5,color=F) #run and copy to clipboard 
+
+reprex(venue = "gh") 
  
+reprex(wd = ".") #working directory 
+
+```
+
+#Fix the code 
+library(dplyr)
+
+ggplot(world, aes(x = gdpPercap, fill = continent)) + #'y=continent' not necessary since we are working with geom_density, use fill instead of color  
+  geom_density(alpha = 0.5) +
+  theme_minimal() +
+  labs(x = "GDP Per Capita", y = "Density") + 
+  theme(legend.position = "bottom")

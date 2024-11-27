@@ -1,7 +1,100 @@
 ---
 title: "Case Study 08"
-author: Your Name
-date: August 1, 2020
-output: github_document
+author: "Faithwin"
+date: "`r Sys.Date()`"
+output: html_document
 ---
  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+```{r}
+#install.packages("ggmap")
+library(sf)
+library(tidyverse)
+library(ggmap)
+library(spData)
+data(world)
+data(us_states)
+
+```
+
+# Download the csv from noaa with storm track information
+```{r}
+dataurl="https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/access/csv/ibtracs.NA.list.v04r01.csv"
+
+```
+#Read the data into a csv file and view 
+
+```{r}
+storm_data <- read_csv(dataurl)
+View(storm_data)
+```
+
+# Step 2: Wrangle the data
+We have to create a new column with just the year using year(ISO_TIME)
+Filter to storms 1950-present with filter()
+
+```{r}
+storm_new <- storm_data %>%
+  mutate(year = year(ISO_TIME)) %>%              # Add year column
+  filter(year >= 1950) %>%                       # Filter to storms 1950-present
+  mutate_if(is.numeric, function(x) ifelse(x == -999.0, NA, x)) %>%  # Convert -999 to NA
+  mutate(decade = floor(year / 10) * 10)         # Add decade column
+
+```
+
+# Step 3: Convert data to sf object
+```{r}
+storms <- st_as_sf(storm_new, coords = c("LON", "LAT"), crs = 4326)
+
+# Step 4: Identify bounding box of the storm data
+region <- st_bbox(storms)
+```
+
+## Including Plots
+
+Make the first plot
+
+```{r}
+ggplot() +
+  geom_sf(data = world) +
+  stat_bin2d(data = storms, aes(x = st_coordinates(storms)[,1], y = st_coordinates(storms)[,2]), bins = 100) +
+  scale_fill_distiller(palette = "YlOrRd", trans = "log", direction = -1, breaks = c(1, 10, 100, 1000)) +
+  facet_wrap(~decade) +
+  coord_sf(ylim = region[c(2, 4)], xlim = region[c(1, 3)]) +
+  theme_minimal() +
+  labs(title = "Summary plot of storm track data from NOAA")
+```
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+# Now, we will calculate the top 5 states 
+```{r}
+states <- us_states %>% 
+  st_transform(st_crs(storms)) %>%   # Reproject to match storms data
+  select(state = NAME)               # Rename NAME column to state
+
+# Step 7: Perform spatial join to find storms within each state
+storm_states <- st_join(storms, states, join = st_intersects, left = FALSE) #This will ‘add’ the state to any storm that was recorded within that state.
+storm_states
+```
+# Step 8: Summarize storm counts by state
+
+```{r}
+storm_counts <- storm_states %>%
+  group_by(state) %>%
+  summarize(storms = length(unique(NAME))) %>% #to count how many unique storms occurred in each state.
+  arrange(desc(storms)) %>%
+  slice(1:5)%>%  # Keep only top 5 states
+  select(state, storms) %>%         # to select only state and storms columns
+  st_set_geometry(NULL)
+```
+
+# View the table of the top 5 states
+
+```{r}
+#print(storm_counts)
+storm_counts
+```

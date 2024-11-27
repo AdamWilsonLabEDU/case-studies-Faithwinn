@@ -4,4 +4,46 @@ author: Your Name
 date: August 1, 2020
 output: github_document
 ---
+#Load Libraries 
+```{r}
+install.packages("widgetframe")
+install.packages("dygraphs")
+install.packages("openmeteo")
+library(tidyverse)
+library(htmlwidgets)
+library(widgetframe)
+library(xts)
+library(dygraphs)
+library(openmeteo)
+```
+ 
+```{r}
+d<- weather_history(c(43.00923265935055, -78.78494250958327),start = "2023-01-01",end=today(),
+                  daily=list("temperature_2m_max","temperature_2m_min","precipitation_sum")) %>% 
+  mutate(daily_temperature_2m_mean=(daily_temperature_2m_max+daily_temperature_2m_min)/2)
+```
+ 
+```{r}
+#first select the columns you need 
+view(d)
+
+d%>%
+  select(daily_temperature_2m_max,daily_temperature_2m_min )
+```
+
+
+```{r}
+plotly <- d%>%
+  select("date", "daily_temperature_2m_max","daily_precipitation_sum" )
+
+plot <- xts(plotly, order.by = plotly$date, frequency = plotly$daily_temperature_2m_max, main= "Daily Maximum Temperature in Buffalo, NY")
+```
+ 
+```{r}
+dygraph(plot, main= "Daily Maximum Temperature in Buffalo, NY") %>%
+  dySeries("daily_temperature_2m_max", color = "blue")%>%
+  dySeries("daily_precipitation_sum", color = "blue")
+   
+```
+ 
  
