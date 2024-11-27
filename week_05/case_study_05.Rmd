@@ -1,6 +1,6 @@
 ---
 title: "Case Study 05"
-author: Your Name
+author: Faithwin Gbadamosi
 date: August 1, 2020
 output: github_document
 ---
